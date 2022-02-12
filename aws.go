@@ -12,11 +12,14 @@ import (
 )
 
 func Instance(command string) {
+
+	config := Configure()
+
 	// Load session from shared config
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: "default",
+		Profile: config.Profile,
 		Config: aws.Config{
-			Region: aws.String("us-east-2"),
+			Region: aws.String(config.Region),
 		},
 	}))
 
