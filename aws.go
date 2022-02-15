@@ -28,10 +28,10 @@ func Instance(command string) {
 
 	if os.Args[1] == "START" { // START
 		startInstance(os.Args[2], svc)
-	} else if os.Args[1] == "STOP" { // Turn instances off
+	} else if os.Args[1] == "STOP" { // stop instance
 		instanceStop(os.Args[2], svc)
 	} else if os.Args[1] == "CREATE" { // Create instance
-		createInstance(os.Args[2], svc)
+		createInstance(svc)
 	} else if os.Args[1] == "DESTROY" { // Destroy instance
 		destroyInstance(os.Args[2], svc)
 	} else if os.Args[1] == "LIST" { // List instances
@@ -41,24 +41,65 @@ func Instance(command string) {
 	}
 }
 
-func createInstance(ami string, svc *ec2.EC2) {
-	// create instance with ami
-	result, err := svc.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String(ami),
-		InstanceType: aws.String("t2.micro"),
-		MinCount:     aws.Int64(1),
-		MaxCount:     aws.Int64(1),
+func getAmi(svc *ec2.EC2) *string {
+	result, err := svc.DescribeImages(&ec2.DescribeImagesInput{
+		Owners: []*string{
+			aws.String("099720109477"),
+		},
 	})
 	if err != nil {
 		fmt.Println("Error", err)
-	} else {
-		fmt.Println("Success", result.Instances)
+		return nil
 	}
 
-	// get instance id
+	return result.Images[0].ImageId
+}
+
+func createInstance(svc *ec2.EC2) {
+	config := Configure()
+
+	ami := getAmi(svc)
+
+	result, err := svc.RunInstances(&ec2.RunInstancesInput{
+		ImageId:      ami,
+		InstanceType: aws.String("t2.micro"),
+		MinCount:     aws.Int64(1),
+		MaxCount:     aws.Int64(1),
+		KeyName:      aws.String(config.KeyName),
+		SecurityGroups: []*string{
+			aws.String(config.SecurityGroup),
+		},
+	})
+
+	if err != nil {
+		fmt.Println("Error", err)
+	}
+
 	instanceID := *result.Instances[0].InstanceId
 
 	fmt.Println("Instance ID:", instanceID)
+	fmt.Println("Waiting for instance to be running...")
+
+	// Wait for instance to be running
+	svc.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{
+			aws.String(instanceID),
+		},
+	})
+
+	input := &ec2.DescribeInstancesInput{
+		InstanceIds: []*string{
+			aws.String(instanceID),
+		},
+	}
+
+	resultDescribe, err := svc.DescribeInstances(input)
+	if err != nil {
+		fmt.Println("Error", err)
+	}
+
+	fmt.Println("Instance IP:", *resultDescribe.Reservations[0].Instances[0].PublicIpAddress)
+	fmt.Println("Instance DNS:", *resultDescribe.Reservations[0].Instances[0].PublicDnsName)
 }
 
 func destroyInstance(instanceID string, svc *ec2.EC2) {
