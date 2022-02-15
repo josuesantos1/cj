@@ -8,10 +8,12 @@ import (
 )
 
 type Config struct {
-	Profile string `hcl:"profile"`
-	Region  string `hcl:"region"`
-	Path    string `hcl:"path,optional"`
-	Shell   string `hcl:"shell,optional"`
+	Profile       string `hcl:"profile"`
+	Region        string `hcl:"region"`
+	Path          string `hcl:"path,optional"`
+	Shell         string `hcl:"shell,optional"`
+	KeyName       string `hcl:"keyName"`
+	SecurityGroup string `hcl:"securityGroup"`
 }
 
 func Configure() Config {
