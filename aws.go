@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -56,6 +57,8 @@ func getAmi(svc *ec2.EC2) *string {
 }
 
 func createInstance(svc *ec2.EC2) {
+	var workspace Workspace
+
 	config := Configure()
 
 	ami := getAmi(svc)
@@ -98,8 +101,20 @@ func createInstance(svc *ec2.EC2) {
 		fmt.Println("Error", err)
 	}
 
+	ipv4 := *resultDescribe.Reservations[0].Instances[0].PublicDnsName
+
 	fmt.Println("Instance IP:", *resultDescribe.Reservations[0].Instances[0].PublicIpAddress)
-	fmt.Println("Instance DNS:", *resultDescribe.Reservations[0].Instances[0].PublicDnsName)
+	fmt.Println("Instance DNS:", ipv4)
+
+	// Create workspace
+	workspace.InstanceID = instanceID
+	workspace.Type = "t2.micro"
+	workspace.Ami = *ami
+	workspace.Ipv4 = ipv4
+	workspace.CreatedAt = time.Now().In(time.UTC)
+	workspace.PrivateKey = config.PrivateKey
+
+	CreateWorkspace(workspace)
 }
 
 func destroyInstance(instanceID string, svc *ec2.EC2) {
