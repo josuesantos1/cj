@@ -13,6 +13,7 @@ type Config struct {
 	Path          string `hcl:"path,optional"`
 	Shell         string `hcl:"shell,optional"`
 	KeyName       string `hcl:"keyName"`
+	PrivateKey    string `hcl:"privateKey"`
 	SecurityGroup string `hcl:"securityGroup"`
 }
 
