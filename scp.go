@@ -11,14 +11,16 @@ import (
 )
 
 func SCP() {
+	workspace := ReadWorkspace()
+
 	// Use SSH key authentication from the auth package
 	// we ignore the host key in this example, please change this if you use this library
-	clientConfig, _ := auth.PrivateKey("ubuntu", "<private key>", ssh.InsecureIgnoreHostKey())
+	clientConfig, _ := auth.PrivateKey("ubuntu", workspace.PrivateKey, ssh.InsecureIgnoreHostKey())
 
 	// For other authentication methods see ssh.ClientConfig and ssh.AuthMethod
 
 	// Create a new SCP client
-	client := scp.NewClient("<host>", &clientConfig)
+	client := scp.NewClient(workspace.Host+":22", &clientConfig)
 
 	// Connect to the remote server
 	err := client.Connect()
