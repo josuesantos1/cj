@@ -9,10 +9,11 @@ import (
 )
 
 func SSH() {
+	workspace := ReadWorkspace()
 
 	var privateKey []byte
 
-	privateKey, err := ioutil.ReadFile("<private key>")
+	privateKey, err := ioutil.ReadFile(workspace.PrivateKey)
 	if err != nil {
 		fmt.Println("Error while reading private key ", err)
 		return
@@ -32,7 +33,7 @@ func SSH() {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	client, err := ssh.Dial("tcp", "<host>", config)
+	client, err := ssh.Dial("tcp", workspace.Host+":22", config)
 
 	if err != nil {
 		fmt.Println("Error while dialing ", err)
@@ -50,7 +51,7 @@ func SSH() {
 
 	session.Stdout = &b
 
-	if err := session.Run("ls"); err != nil {
+	if err := session.Run("chmod +x cj.sh && sed -i -e 's/\r$//' cj.sh && ./cj.sh"); err != nil {
 		fmt.Println("Error while running command ", err)
 		return
 	}
