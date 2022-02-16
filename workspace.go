@@ -35,3 +35,17 @@ func CreateWorkspace(workspace Workspace) {
 		fmt.Println(err)
 	}
 }
+
+func ReadWorkspace() Workspace {
+	file, err := os.Open("cj.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer file.Close()
+
+	var workspace Workspace
+	json.NewDecoder(file).Decode(&workspace)
+
+	return workspace
+}
