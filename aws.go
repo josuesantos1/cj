@@ -110,7 +110,7 @@ func createInstance(svc *ec2.EC2) {
 	workspace.InstanceID = instanceID
 	workspace.Type = "t2.micro"
 	workspace.Ami = *ami
-	workspace.Ipv4 = ipv4
+	workspace.Host = ipv4
 	workspace.CreatedAt = time.Now().In(time.UTC)
 	workspace.PrivateKey = config.PrivateKey
 

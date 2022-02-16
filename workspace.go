@@ -12,7 +12,7 @@ type Workspace struct {
 	Ami        string    `json:"ami"`
 	Type       string    `json:"type"`
 	InstanceID string    `json:"instance_id"`
-	Ipv4       string    `json:"ipv4"`
+	Host       string    `json:"host"`
 	CreatedAt  time.Time `json:"created_at"`
 	PrivateKey string    `json:"private_key"`
 }
